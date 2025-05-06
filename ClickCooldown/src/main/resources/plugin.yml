@@ -1,0 +1,15 @@
+name: ClickCooldown
+version: '1.0'
+main: org.thedoffee.clickcooldown.ClickCooldown
+api-version: 1.12
+description: Adds cooldown functionality for activators
+commands:
+  clickcooldown:
+    description: Sets a cooldown
+    usage: /clickcooldown <seconds>
+    permission: clickcooldown.use
+    permission-message: No permission!
+permissions:
+  clickcooldown.use:
+    default: op
+    description: Use of command
