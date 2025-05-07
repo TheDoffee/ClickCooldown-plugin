@@ -15,6 +15,7 @@ ClickCooldown allows you to set a cooldown time for any activator. When a player
 - Proper functionality with redstone signals
 - Recovery of activators after server restart
 - Save all settings and active cooldowns
+- **NEW:** Automatic removal of broken activators from the cooldown system
 
 ## Commands
 
@@ -57,6 +58,33 @@ The plugin stores all information in the `plugins/ClickCooldown/cooldowns.yml` f
 - Data about block type and orientation
 
 When the server is shut down during an active cooldown, the information is saved, and upon the next startup, the activator will be restored at the right time with the correct orientation.
+
+### NEW: Activator Destruction Handling
+
+The plugin now monitors and handles destruction of activators in any way:
+- Breaking by players
+- Explosions (TNT, Creepers, etc.)
+- Burning
+- Water or lava flow
+- Piston movement
+- Any block changes by entities
+- Other physical world changes
+
+If an activator is destroyed in any way, it is automatically removed from the cooldown system to prevent memory leaks and configuration file growth.
+
+## Latest Changes
+
+### Version 1.1.0
+
+#### New Features:
+- Added automatic removal of broken activators from the cooldown system
+- Improved event handling for all types of block destruction 
+- Enhanced configuration cleanup
+
+#### Bug Fixes:
+- Fixed memory leak when activators were destroyed during cooldown
+- Improved configuration management to prevent growth of the config file
+- Optimized code for better performance
 
 ## Development
 

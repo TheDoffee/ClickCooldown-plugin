@@ -9,14 +9,26 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.material.Lever;
 import org.bukkit.material.PressurePlate;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -111,6 +123,61 @@ public class ClickCooldown extends JavaPlugin implements Listener {
         }
     }
     
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        checkAndRemoveActivator(event.getBlock());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBurn(BlockBurnEvent event) {
+        checkAndRemoveActivator(event.getBlock());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        checkAndRemoveActivators(event.blockList());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        checkAndRemoveActivators(event.blockList());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockFromTo(BlockFromToEvent event) {
+        checkAndRemoveActivator(event.getToBlock());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockFade(BlockFadeEvent event) {
+        checkAndRemoveActivator(event.getBlock());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        checkAndRemoveActivator(event.getBlock());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        checkAndRemoveActivators(event.getBlocks());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        checkAndRemoveActivators(event.getBlocks());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPhysics(BlockPhysicsEvent event) {
+        Block block = event.getBlock();
+        
+        if (isValidActivator(block.getType()) && 
+            !isValidActivator(event.getChangedType())) {
+            cooldownManager.removeBlock(block);
+        }
+    }
+    
     private void handleActivation(PlayerInteractEvent event, Block block) {
         if (cooldownManager.hasCooldown(block)) {
             event.setCancelled(true);
@@ -141,5 +208,21 @@ public class ClickCooldown extends JavaPlugin implements Listener {
     
     private boolean isValidActivator(Material material) {
         return isButtonOrLever(material) || isPressurePlate(material);
+    }
+
+    private void checkAndRemoveActivator(Block block) {
+        if (block != null && isValidActivator(block.getType())) {
+            cooldownManager.removeBlock(block);
+        }
+    }
+    
+    private void checkAndRemoveActivators(List<Block> blocks) {
+        if (blocks == null || blocks.isEmpty()) {
+            return;
+        }
+        
+        for (Block block : blocks) {
+            checkAndRemoveActivator(block);
+        }
     }
 } 

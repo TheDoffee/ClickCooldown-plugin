@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -308,5 +309,30 @@ public class CooldownManager {
                loc.getBlockX() + ":" + 
                loc.getBlockY() + ":" + 
                loc.getBlockZ();
+    }
+
+    public void removeBlock(Block block) {
+        String blockKey = getBlockKey(block);
+        
+        if (activeCooldowns.containsKey(blockKey)) {
+            BukkitTask task = activeCooldowns.remove(blockKey);
+            if (task != null) {
+                task.cancel();
+            }
+        }
+        
+        cooldownTimes.remove(blockKey);
+        endTimes.remove(blockKey);
+        pendingRestorations.remove(blockKey);
+        blockData.remove(blockKey);
+        
+        cooldownsConfig.set("cooldowns." + blockKey, null);
+        cooldownsConfig.set("active_cooldowns." + blockKey, null);
+        cooldownsConfig.set("block_data." + blockKey, null);
+        cooldownsConfig.set("block_types." + blockKey, null);
+        
+        saveCooldowns();
+        
+        plugin.getLogger().info("Block " + blockKey + " was removed from cooldown system");
     }
 } 
